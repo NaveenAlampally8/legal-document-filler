@@ -2,7 +2,7 @@
 
 A web app that accepts legal document uploads (.docx), automatically identifies placeholders like `[Company Name]` and `$[Amount]`, and provides a conversational interface to fill them in. Download your completed document instantly.
 
-# Link to Application:
+# Link to Live Application: https://legal-document-filler-rz6r.onrender.com/
 
 # Youtube Link: 
 
