@@ -30,3 +30,11 @@ dist/
 
 # pytest
 .pytest_cache/
+
+
+# Test Outputs
+test_output.docx
+Testing/test_output.docx
+Testing/test_output.*
+**/test_output.*
+test_outputs/
