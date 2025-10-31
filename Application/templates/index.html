@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Document Filler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-section {
+            display: none;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 15px 20px;
+            border-radius: 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.bot .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user .message-content {
+            background: #e0e0e0;
+            color: #333;
+            border-bottom-right-radius: 5px;
+        }
+
+        .context-hint {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .completion-section {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .completion-text {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .completion-hint {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Legal Document Filler</h1>
+            <p>Upload your document and let's fill it together</p>
+        </div>
+
+        <div class="content">
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Drop your .docx file here</div>
+                    <div class="upload-hint">or click to browse</div>
+                    <input type="file" id="fileInput" class="file-input" accept=".docx">
+                </div>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Processing your document...</p>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="chat-section" id="chatSection">
+                <div class="progress-text" id="progressText"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="chat-box" id="chatBox"></div>
+                <div class="input-group">
+                    <input type="text" class="message-input" id="messageInput" placeholder="Type your answer here..."
+                        autocomplete="off">
+                    <button class="btn" id="sendBtn">Send</button>
+                </div>
+            </div>
+
+            <!-- Completion Section -->
+            <div class="completion-section" id="completionSection">
+                <div class="success-icon">✅</div>
+                <div class="completion-text">Document Complete!</div>
+                <div class="completion-hint">Your document has been filled with all the information</div>
+                <div class="btn-group">
+                    <button class="btn" id="downloadBtn">Download Document</button>
+                    <button class="btn btn-secondary" id="startOverBtn">Start Over</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const chatSection = document.getElementById('chatSection');
+        const completionSection = document.getElementById('completionSection');
+        const chatBox = document.getElementById('chatBox');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const startOverBtn = document.getElementById('startOverBtn');
+
+        let currentQuestion = null;
+
+        // Upload area interactions
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        // Handle file upload
+        async function handleFileUpload(file) {
+            if (!file.name.endsWith('.docx')) {
+                showError('Please upload a .docx file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showLoading(true);
+            hideError();
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    uploadSection.style.display = 'none';
+                    chatSection.style.display = 'block';
+                    showLoading(false);
+                    loadNextQuestion();
+                } else {
+                    showError(data.error || 'Upload failed');
+                    showLoading(false);
+                }
+            } catch (error) {
+                showError('Error uploading file. Please try again.');
+                showLoading(false);
+            }
+        }
+
+        // Load next question
+        async function loadNextQuestion() {
+            try {
+                const response = await fetch('/get_question');
+                const data = await response.json();
+
+                if (data.complete) {
+                    await generateDocument();
+                    return;
+                }
+
+                currentQuestion = data;
+                addBotMessage(data.question, data.context);
+                updateProgress(data.progress);
+            } catch (error) {
+                showError('Error loading question');
+            }
+        }
+
+        // Send answer
+        async function sendAnswer() {
+            const answer = messageInput.value.trim();
+            if (!answer) return;
+
+            addUserMessage(answer);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('/submit_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        answer
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadNextQuestion();
+                } else {
+                    showError(data.error || 'Invalid answer');
+                }
+            } catch (error) {
+                showError('Error submitting answer');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Generate document
+        async function generateDocument() {
+            showLoading(true);
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    chatSection.style.display = 'none';
+                    completionSection.style.display = 'block';
+                    showLoading(false);
+                } else {
+                    showError(data.error || 'Error generating document');
+                    showLoading(false);
+                }
+            } catch (error) {
+                showError('Error generating document');
+                showLoading(false);
+            }
+        }
+
+        // Add bot message
+        function addBotMessage(text, context) {
+            const message = document.createElement('div');
+            message.className = 'message bot';
+
+            let content = `<div class="message-content">${escapeHtml(text)}`;
+            if (context) {
+                content += `<div class="context-hint">Context: "${escapeHtml(context)}"</div>`;
+            }
+            content += '</div>';
+
+            message.innerHTML = content;
+            chatBox.appendChild(message);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Add user message
+        function addUserMessage(text) {
+            const message = document.createElement('div');
+            message.className = 'message user';
+            message.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+            chatBox.appendChild(message);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Update progress
+        function updateProgress(progressText) {
+            const match = progressText.match(/(\d+)\/(\d+)/);
+            if (match) {
+                const current = parseInt(match[1]);
+                const total = parseInt(match[2]);
+                const percentage = (current / total) * 100;
+                progressFill.style.width = percentage + '%';
+                document.getElementById('progressText').textContent =
+                    `Question ${current} of ${total}`;
+            }
+        }
+
+        // Show/hide error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => hideError(), 5000);
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        // Show/hide loading
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Download document
+        downloadBtn.addEventListener('click', () => {
+            window.location.href = '/download';
+        });
+
+        // Start over
+        startOverBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/reset', {
+                    method: 'POST'
+                });
+                location.reload();
+            } catch (error) {
+                showError('Error resetting');
+            }
+        });
+
+        // Send on Enter key
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendAnswer();
+            }
+        });
+
+        sendBtn.addEventListener('click', sendAnswer);
+    </script>
+</body>
+
+</html>
