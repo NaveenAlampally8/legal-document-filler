@@ -4,7 +4,7 @@ A web app that accepts legal document uploads (.docx), automatically identifies 
 
 # Link to Live Application: https://legal-document-filler-rz6r.onrender.com/
 
-# Youtube Link:
+# Loom Link: https://www.loom.com/share/d0106c8c10b942a98b1b2f4fe1a09b58
 
 ## Quick Setup
 
